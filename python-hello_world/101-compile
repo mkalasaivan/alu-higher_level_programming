@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Check if PYFILE is set
+if [ -z "$PYFILE" ]; then
+    echo "Error: PYFILE environment variable is not set."
+    exit 1
+fi
+
+# Extract the filename without extension
+FILENAME=$(basename "$PYFILE" .py)
+
+# Compile the Python file
+echo "Compiling $PYFILE ..."
+python3 -m py_compile "$PYFILE"
+
+# Rename the compiled file if it exists
+COMPILED_FILE="__pycache__/${FILENAME}.cpython-*.pyc"
+if ls $COMPILED_FILE 1> /dev/null 2>&1; then
+    mv $COMPILED_FILE "${FILENAME}.pyc"
+    echo "Compiled file created: ${FILENAME}.pyc"
+
+    # Check for occurrences of "Best School" in the compiled file
+    COUNT=$(zgrep -c "Best School" "${FILENAME}.pyc")
+    echo "Occurrences of 'Best School': $COUNT"
+else
+    echo "Error: Compilation failed."
+    exit 1
+fi
